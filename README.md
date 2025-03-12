@@ -103,7 +103,7 @@ debuggerConsole.on('line', (cmd) => {
             break;
     }
 });
-``
+```
 
 Or run it using the following command:
 

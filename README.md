@@ -1,5 +1,8 @@
 # flowprompt
 
+[![npm version](https://img.shields.io/npm/v/flowprompt.svg)](https://www.npmjs.com/package/flowprompt)
+[![npm downloads](https://img.shields.io/npm/dw/flowprompt)](https://www.npmjs.com/package/flowprompt)
+
 A Node.js terminal interface library for building rich interactive CLI applications. It provides a persistent prompt with managed logging output above. It's like REPL interfaces but has the benefit of output and input being evaulated separately. It is inspired by debugger interfaces like `gdb`.
 
 ## Table of Contents

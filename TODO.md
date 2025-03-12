@@ -1,0 +1,3 @@
+- allow turning double Ctrl+C off
+- allow color customization
+- fix line wrapping

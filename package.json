@@ -1,0 +1,28 @@
+{
+  "name": "promptflow",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "prepare": "npm run build",
+    "buildOnly": "npm run build",
+    "clean": "rimraf dist",
+    "build:cjs": "tsc -p tsconfig.cjs.json && echo {\"type\": \"commonjs\"} > ./dist/cjs/package.json",
+    "build:esm": "tsc -p tsconfig.esm.json && echo {\"type\": \"module\"} > ./dist/esm/package.json",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3"
+  },
+  "exports": {
+    "require": "./dist/cjs/index.js",
+    "import": "./dist/esm/index.js"
+  },
+  "main": "./dist/cjs/index.js"
+}

@@ -1,4 +1,4 @@
-const { Console } = require('promptflow');
+const { Console } = require('flowprompt');
 
 const vm = new Console({
     input: process.stdin,

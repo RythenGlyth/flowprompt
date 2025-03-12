@@ -1,4 +1,4 @@
-import { Console } from 'promptflow';
+import { Console } from 'flowprompt';
 
 const vm = new Console({
     input: process.stdin,

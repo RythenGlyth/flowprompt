@@ -1,4 +1,4 @@
-# promptflow
+# flowprompt
 
 A Node.js terminal interface library for building rich interactive CLI applications. It provides a persistent prompt with managed logging output above. It's like REPL interfaces but has the benefit of output and input being evaulated separately. It is inspired by debugger interfaces like `gdb`.
 

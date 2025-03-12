@@ -17,7 +17,7 @@ A Node.js terminal interface library for building rich interactive CLI applicati
 ## Installation
 
 ```sh
-npm install promptflow
+npm install flowprompt
 ```
 
 ## Examples
@@ -27,7 +27,7 @@ npm install promptflow
 [view /examples/typescript-example.ts](examples/typescript-example.ts)
 
 ```typescript
-import { Console } from 'promptflow';
+import { Console } from 'flowprompt';
 
 const vm = new Console({
     input: process.stdin,
@@ -52,7 +52,7 @@ npx tsx examples/typescript-example.ts
 [view /examples/async-example.cjs](examples/async-example.cjs)
 
 ```javascript
-const { Console } = require('promptflow')
+const { Console } = require('flowprompt')
 
 const vm = new Console({
     input: process.stdin,
@@ -79,7 +79,7 @@ node examples/async-example.cjs
 [view /examples/debugger-example.mjs](examples/debugger-example.mjs)
 
 ```javascript
-import { Console } from 'promptflow';
+import { Console } from 'flowprompt';
 
 const debuggerConsole = new Console({
     input: process.stdin,

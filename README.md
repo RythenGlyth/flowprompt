@@ -2,6 +2,16 @@
 
 A Node.js terminal interface library for building rich interactive CLI applications. It provides a persistent prompt with managed logging output above. It's like REPL interfaces but has the benefit of output and input being evaulated separately. It is inspired by debugger interfaces like `gdb`.
 
+## Table of Contents
+
+- [Key Features](#key-features)
+- [Installation](#installation)
+- [Examples](#examples)
+  - [TypeScript Example](#typescript-example)
+  - [Asynchronous Output Example](#asynchronous-output-example)
+  - [Debugger-like Interface Example](#debugger-like-interface-example)
+- [Contributing](#contributing)
+
 ## Key Features
 1. **Persistent Prompt** - Always-visible input area with custom prompt symbol
 1. **Async-safe Logging** - Write to output while waiting for user input without UI corruption

@@ -124,6 +124,16 @@ debuggerConsole.on('line', (cmd) => {
             break;
     }
 });
+
+const completions = ['breakpoints', 'continue', 'help'];
+
+debuggerConsole.on('autocomplete', ({line, pos, callback}) => {
+    const lineEnd = line.slice(line.lastIndexOf(' ', pos - 1), pos)
+    const hits = completions.filter((c) => c.startsWith(lineEnd)).map((c) => c.slice(lineEnd.length));
+    const ccompletions = hits.map((hit) => ({line: `${line.slice(0, pos)}${hit}${line.slice(pos)}`, pos: pos + hit.length}))
+    debuggerConsole.log(ccompletions.toString())
+    callback(ccompletions);
+})
 ```
 
 <sup>[view /examples/debugger-example.mjs](examples/debugger-example.mjs)</sup>

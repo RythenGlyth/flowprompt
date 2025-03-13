@@ -4,6 +4,21 @@ import { StringDecoder } from 'string_decoder';
 
 const CONTROL_CHAR_REGEX = /\p{General_Category=Control}/ug;
 
+interface ConsoleEvents {
+    line: (line: string) => void;
+    autocomplete: (args: {line: string, pos: number, callback: (completions: {line: string, pos: number}[]) => void}) => void;
+
+    //streaming interface
+    finish: () => void;
+    error: (err: Error) => void;
+}
+
+declare interface Console {
+    on<U extends keyof ConsoleEvents>(event: U, listener: ConsoleEvents[U]): this;
+    emit<U extends keyof ConsoleEvents>(event: U, ...args: Parameters<ConsoleEvents[U]>): boolean;
+}
+
+
 class Console extends EventEmitter {
     private input: NodeJS.ReadStream;
     private output: NodeJS.WriteStream;
@@ -11,6 +26,10 @@ class Console extends EventEmitter {
     private afterInput!: string;
     private promptlength!: number;
     private doubleCtrlC: boolean;
+    
+    private isAutoCompleting: boolean;
+    private autoCompletions: {line: string, pos: number}[];
+    private autoCompletionIndex: number;
 
     private inBuffer: string[];
     private inPos: number;
@@ -53,6 +72,9 @@ class Console extends EventEmitter {
         this.inBuffer = [];
         this.inPos = 0;
         this.pressedControlC = false;
+        this.isAutoCompleting = false;
+        this.autoCompletions = [];
+        this.autoCompletionIndex = -1;
         this.logPos = {
             hadNewline: true,
             x: 1,
@@ -171,6 +193,8 @@ class Console extends EventEmitter {
     }
 
     private processCompleteEscapeSeq(seq: string[]) {
+        const wasAutoCompleting = this.isAutoCompleting;
+        this.isAutoCompleting = false;
         if(seq[0] === '\x1B' && seq[1] === 'd') {
             let newPos = this.inPos + 1;
             let newWordPos = this.inBuffer.slice(newPos).findIndex(x => (/[^\w]/).test(x));
@@ -268,6 +292,11 @@ class Console extends EventEmitter {
                     return;
                 }
                 break;
+            case 'Z': // Shift+Tab
+                if(this.isAutoCompleting = wasAutoCompleting) {
+                    this.autoComplete(-1);
+                }
+                return;
             case 'H': // Home key
                 this.inPos = 0;
                 this.repositionCursor();
@@ -282,6 +311,7 @@ class Console extends EventEmitter {
 
     private processNormalChar(char: string) {
         if(char != '\u0003') this.pressedControlC = false;
+        if(char != '\t') this.isAutoCompleting = false;
         switch (char) {
             case '\u0003': // Ctrl+C
                 if(this.pressedControlC || !this.doubleCtrlC) {
@@ -307,7 +337,23 @@ class Console extends EventEmitter {
                 }
                 break;
             case '\t': // Tab
+                if(this.isAutoCompleting) {
+                    this.autoComplete(1);
+                    break;
+                }
                 //TODO: Autocomplete
+                this.emit('autocomplete', {
+                    line: this.inBuffer.join(''),
+                    pos: this.inPos,
+                    callback: (completions: {line: string, pos: number}[]) => {
+                        if(completions.length > 0) {
+                            this.autoCompletionIndex = -1;
+                            this.autoCompletions = completions;
+                            this.isAutoCompleting = true;
+                            this.autoComplete(1);
+                        }
+                    }
+                })
                 break;
             default:
                 if(CONTROL_CHAR_REGEX.test(char)) {
@@ -318,6 +364,14 @@ class Console extends EventEmitter {
                 this.redisplay();
                 break;
         }
+    }
+
+    private autoComplete(dir: number) {
+        if(this.autoCompletions.length === 0) return;
+        this.autoCompletionIndex = (this.autoCompletionIndex + dir) % this.autoCompletions.length;
+        this.inBuffer = [...this.autoCompletions[this.autoCompletionIndex].line];
+        this.inPos = this.autoCompletions[this.autoCompletionIndex].pos;
+        this.redisplay();
     }
 
     private processSendInput() {

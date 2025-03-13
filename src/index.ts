@@ -296,6 +296,14 @@ class Console extends EventEmitter {
                     this.inBuffer.splice(this.inPos, newPos - this.inPos);
                     this.redisplay();
                     return;
+                } else if(paramsTil[0] === '1') { // Home key
+                    this.inPos = 0;
+                    this.repositionCursor();
+                    return;
+                } else if(paramsTil[0] === '4') { // End key
+                    this.inPos = this.inBuffer.length;
+                    this.repositionCursor();
+                    return;
                 }
                 break;
             case 'Z': // Shift+Tab

@@ -1,4 +1,3 @@
 - ctrl+backspace to delete word (hard to implement, sent sequences are not consistent across terminals, backspace and ctrl+backspace are swapped in some terminals)
-- allow custom SIGINT handler
 - switch to keypress events instead of data events for better control
 - fix line wrapping

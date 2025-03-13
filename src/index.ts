@@ -8,6 +8,7 @@ const CONTROL_CHAR_REGEX = /\p{General_Category=Control}/ug;
 interface ConsoleEvents {
     line: (line: string) => void;
     autocomplete: (args: {line: string, pos: number, callback: (completions: {line: string, pos: number}[]) => void}) => void;
+    SIGINT: () => void;
 
     //streaming interface
     finish: () => void;
@@ -27,6 +28,7 @@ class Console extends EventEmitter {
     private afterInput!: string;
     private promptlength!: number;
     private doubleCtrlC: boolean;
+    private customSigint: boolean;
     
     private isAutoCompleting: boolean;
     private autoCompletions: {line: string, pos: number}[];
@@ -54,14 +56,16 @@ class Console extends EventEmitter {
         /** afterinput is a string that will be printed after the input line to fix ansi sequences */
         afterInput='',
         encoding='utf8',
-        doubleCtrlC=true
+        doubleCtrlC=true,
+        customSigint=false
     }: {
         input: NodeJS.ReadStream,
         output: NodeJS.WriteStream,
         prompt?: string,
         afterInput?: string,
         encoding?: BufferEncoding,
-        doubleCtrlC?: boolean
+        doubleCtrlC?: boolean,
+        customSigint?: boolean
     }) {
         super();
         this.input = input;
@@ -69,6 +73,7 @@ class Console extends EventEmitter {
         this.changePrompt(prompt, false);
         this.changeAfterInput(afterInput, false);
         this.doubleCtrlC = doubleCtrlC;
+        this.customSigint = customSigint;
 
         this.inBuffer = [];
         this.inPos = 0;
@@ -316,7 +321,8 @@ class Console extends EventEmitter {
         switch (char) {
             case '\u0003': // Ctrl+C
                 if(this.pressedControlC || !this.doubleCtrlC) {
-                    process.exit(0);
+                    this.emit('SIGINT');
+                    if(this.customSigint) process.exit(0);
                     break;
                 }
                 this.pressedControlC = true;

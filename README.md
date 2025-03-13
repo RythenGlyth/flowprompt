@@ -21,7 +21,7 @@ A Node.js terminal interface library for building rich interactive CLI applicati
 1. **Multi-line Log Control** - Continue writing to the same output line or create new lines
 1. **Advanced Input Handling** - Supports most important keys and key combinations:
    - History navigation (↑/↓ keys)
-   - Cursor movement (←/→/Home/End)
+   - Advanced Cursor movement (←/→/Home/End/Ctrl+←/Ctrl+→)
    - ANSI escape sequence support
    - Ctrl+C handling (with double-tap exit)
 1. **TypeScript Ready** - Full type definitions included

@@ -1,4 +1,5 @@
 - add GIFs to README
+- Tab completion
 - allow turning double Ctrl+C off
 - allow color customization
 - fix line wrapping

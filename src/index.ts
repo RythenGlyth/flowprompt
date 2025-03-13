@@ -322,7 +322,7 @@ class Console extends EventEmitter {
             case '\u0003': // Ctrl+C
                 if(this.pressedControlC || !this.doubleCtrlC) {
                     this.emit('SIGINT');
-                    if(this.customSigint) process.exit(0);
+                    if(!this.customSigint) process.exit(0);
                     break;
                 }
                 this.pressedControlC = true;

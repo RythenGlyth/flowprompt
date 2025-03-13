@@ -1,12 +1,14 @@
 import { EventEmitter } from 'events';
 import { StringDecoder } from 'string_decoder';
 
-const CONTROL_CHAR_REGEX = /\p{General_Category=Control}/u;
+const CONTROL_CHAR_REGEX = /\p{General_Category=Control}/ug;
 
 class Console extends EventEmitter {
     input: NodeJS.ReadStream;
     output: NodeJS.WriteStream;
     prompt: string;
+    afterInput: string;
+    promptlength: number;
 
     inBuffer: string[];
     inPos: number;
@@ -21,11 +23,27 @@ class Console extends EventEmitter {
     decoder: StringDecoder;
     escapeBuffer: string[];
 
-    constructor({input, output}: {input: NodeJS.ReadStream, output: NodeJS.WriteStream}, prompt = '> ', encoding: BufferEncoding = 'utf8') {
+    constructor({
+        input,
+        output,
+        prompt='> ',
+        /** afterinput is a string that will be printed after the input line to fix ansi sequences */
+        afterInput='',
+        encoding='utf8'
+    }: {
+        input: NodeJS.ReadStream,
+        output: NodeJS.WriteStream,
+        prompt?: string,
+        afterInput?: string,
+        encoding?: BufferEncoding
+    }) {
         super();
         this.input = input;
         this.output = output;
         this.prompt = prompt
+        this.afterInput = afterInput;
+
+        this.promptlength = this.prompt.replace(/\x1b((\[.*?[\x40-\x7E])|.)/g, '').replace(CONTROL_CHAR_REGEX, '').length;
 
         this.inBuffer = [];
         this.inPos = 0;
@@ -290,17 +308,18 @@ class Console extends EventEmitter {
     }
 
     private redisplay() {
-        const promptLine = this.prompt + this.inBuffer.join('');
-        const cursorPos = this.prompt.length + this.inPos + 1;
+        const promptLine = this.prompt + this.inBuffer.join('') + this.afterInput;
+        const cursorPos = this.promptlength + this.inPos + 1;
 
         this.output.write(
             '\x1B[0G' // Move cursor to start of line
             + "\x1B[K" // Clear line
+            + '\x1B[0m' // Reset colors
             + promptLine
             + `\x1B[${cursorPos}G`); // Move cursor to correct position
     }
     private repositionCursor() {
-        const cursorPos = this.prompt.length + this.inPos + 1;
+        const cursorPos = this.promptlength + this.inPos + 1;
         this.output.write(`\x1B[${cursorPos}G`); // Move cursor to correct position
     }
 }

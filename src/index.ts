@@ -1,27 +1,31 @@
 import { EventEmitter } from 'events';
+import { Writable } from 'stream';
 import { StringDecoder } from 'string_decoder';
 
 const CONTROL_CHAR_REGEX = /\p{General_Category=Control}/ug;
 
 class Console extends EventEmitter {
-    input: NodeJS.ReadStream;
-    output: NodeJS.WriteStream;
-    prompt: string;
-    afterInput: string;
-    promptlength: number;
+    private input: NodeJS.ReadStream;
+    private output: NodeJS.WriteStream;
+    private prompt!: string;
+    private afterInput!: string;
+    private promptlength!: number;
+    private doubleCtrlC: boolean;
 
-    inBuffer: string[];
-    inPos: number;
-    pressedControlC: boolean;
-    logPos: {
+    private inBuffer: string[];
+    private inPos: number;
+    private pressedControlC: boolean;
+    private logPos: {
         hadNewline: boolean;
         x: number;
     };
-    history: string[][];
-    historyIndex: number;
+    private history: string[][];
+    private historyIndex: number;
 
-    decoder: StringDecoder;
-    escapeBuffer: string[];
+    private decoder: StringDecoder;
+    private escapeBuffer: string[];
+
+    private writable: Writable;
 
     constructor({
         input,
@@ -29,21 +33,22 @@ class Console extends EventEmitter {
         prompt='> ',
         /** afterinput is a string that will be printed after the input line to fix ansi sequences */
         afterInput='',
-        encoding='utf8'
+        encoding='utf8',
+        doubleCtrlC=true
     }: {
         input: NodeJS.ReadStream,
         output: NodeJS.WriteStream,
         prompt?: string,
         afterInput?: string,
-        encoding?: BufferEncoding
+        encoding?: BufferEncoding,
+        doubleCtrlC?: boolean
     }) {
         super();
         this.input = input;
         this.output = output;
-        this.prompt = prompt
-        this.afterInput = afterInput;
-
-        this.promptlength = this.prompt.replace(/\x1b((\[.*?[\x40-\x7E])|.)/g, '').replace(CONTROL_CHAR_REGEX, '').length;
+        this.changePrompt(prompt, false);
+        this.changeAfterInput(afterInput, false);
+        this.doubleCtrlC = doubleCtrlC;
 
         this.inBuffer = [];
         this.inPos = 0;
@@ -58,6 +63,22 @@ class Console extends EventEmitter {
         this.decoder = new StringDecoder(encoding);
         this.escapeBuffer = [];
 
+        this.writable = new Writable({
+            write: (chunk, encoding, callback) => {
+                if(chunk)
+                    this.log(
+                        Buffer.isBuffer(chunk) ? chunk.toString() : chunk as string,
+                        false // Do not add newline
+                    );
+                callback();
+                return true;
+            }
+        })
+        this.writable.on("finish", () => this.emit("finish"));
+        this.writable.on("error", (err) => this.emit("error", err));
+
+
+
         this.init()
     }
 
@@ -66,6 +87,11 @@ class Console extends EventEmitter {
         this.input.on('data', this.inputHandler.bind(this));
         this.input.resume();
         this.redisplay();
+    }
+
+    public close() {
+        this.input.setRawMode(false);
+        this.input.removeListener('data', this.inputHandler);
     }
 
     private inputHandler(data: string) {
@@ -235,7 +261,7 @@ class Console extends EventEmitter {
         if(char != '\u0003') this.pressedControlC = false;
         switch (char) {
             case '\u0003': // Ctrl+C
-                if(this.pressedControlC) {
+                if(this.pressedControlC || !this.doubleCtrlC) {
                     process.exit(0);
                     break;
                 }
@@ -286,6 +312,22 @@ class Console extends EventEmitter {
         this.redisplay();
     }
 
+    private redisplay() {
+        const promptLine = this.prompt + this.inBuffer.join('') + this.afterInput;
+        const cursorPos = this.promptlength + this.inPos + 1;
+
+        this.output.write(
+            '\x1B[0G' // Move cursor to start of line
+            + "\x1B[K" // Clear line
+            + '\x1B[0m' // Reset colors
+            + promptLine
+            + `\x1B[${cursorPos}G`); // Move cursor to correct position
+    }
+    private repositionCursor() {
+        const cursorPos = this.promptlength + this.inPos + 1;
+        this.output.write(`\x1B[${cursorPos}G`); // Move cursor to correct position
+    }
+
     public log(str: string, newline: boolean = true) {
         if(this.logPos.hadNewline) {
             this.output.write("\x1B[1G"); // Move cursor to start of line
@@ -306,22 +348,30 @@ class Console extends EventEmitter {
 
         this.redisplay();
     }
-
-    private redisplay() {
-        const promptLine = this.prompt + this.inBuffer.join('') + this.afterInput;
-        const cursorPos = this.promptlength + this.inPos + 1;
-
-        this.output.write(
-            '\x1B[0G' // Move cursor to start of line
-            + "\x1B[K" // Clear line
-            + '\x1B[0m' // Reset colors
-            + promptLine
-            + `\x1B[${cursorPos}G`); // Move cursor to correct position
+    public changePrompt(prompt: string, redraw: boolean = true) {
+        this.prompt = prompt;
+        this.promptlength = this.prompt.replace(/\x1b((\[.*?[\x40-\x7E])|.)/g, '').replace(CONTROL_CHAR_REGEX, '').length;
+        if(redraw) this.redisplay();
     }
-    private repositionCursor() {
-        const cursorPos = this.promptlength + this.inPos + 1;
-        this.output.write(`\x1B[${cursorPos}G`); // Move cursor to correct position
+    public changeAfterInput(afterInput: string, redraw: boolean = true) {
+        this.afterInput = afterInput;
+        if(redraw) this.redisplay();
     }
+
+    public write(chunk: any, encoding: BufferEncoding, callback?: (error?: Error | null) => void): boolean {
+        return this.writable.write(chunk, encoding, callback);
+    }
+
+    // Expose the end method (required for piping)
+    public end(): void {
+        this.writable.end();
+    }
+
+    // Expose pipeability by delegating to the internal Writable stream
+    public pipeFrom(source: NodeJS.ReadableStream) {
+        return source.pipe(this.writable);
+    }
+
 }
 
 export { Console };

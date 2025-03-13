@@ -1,5 +1,7 @@
 - add GIFs to README
-- Tab completion
+- ctrl+delete to delete word
+- ctrl+backspace to delete word
+- create stream interface for output
 - allow turning double Ctrl+C off
-- allow color customization
+- Tab completion
 - fix line wrapping

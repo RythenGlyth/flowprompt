@@ -11,6 +11,10 @@
     "build:esm": "tsc -p tsconfig.esm.json && echo {\"type\": \"module\"} > ./dist/esm/package.json",
     "build": "npm run clean && npm run build:cjs && npm run build:esm"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RythenGlyth/flowprompt"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

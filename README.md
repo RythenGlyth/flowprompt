@@ -23,6 +23,7 @@ A Node.js terminal interface library for building rich interactive CLI applicati
 1. **Persistent Prompt** - Always-visible input area with custom prompt symbol
 1. **Async-safe Logging** - Write to output while waiting for user input without UI corruption
 1. **Multi-line Log Control** - Continue writing to the same output line or create new lines
+1. **Piping Support** - Supports piping into the output area
 1. **Advanced Input Handling** - Supports most important keys and key combinations:
    - History navigation (↑/↓ keys)
    - Advanced Cursor movement (←/→/Home/End/Ctrl+←/Ctrl+→)

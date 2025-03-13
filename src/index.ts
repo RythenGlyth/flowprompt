@@ -171,6 +171,18 @@ class Console extends EventEmitter {
     }
 
     private processCompleteEscapeSeq(seq: string[]) {
+        if(seq[0] === '\x1B' && seq[1] === 'd') {
+            let newPos = this.inPos + 1;
+            let newWordPos = this.inBuffer.slice(newPos).findIndex(x => (/[^\w]/).test(x));
+            if(newWordPos === -1) {
+                newPos = this.inBuffer.length;
+            } else {
+                newPos = Math.min(newPos + newWordPos + 1, this.inBuffer.length);
+            }
+            this.inBuffer.splice(this.inPos, newPos - this.inPos);
+            this.redisplay();
+            return;
+        }
         if(seq[0] !== '\x1B' || seq[1] !== '[') {
             this.log(`Unknown escape sequence: ${seq.join('')}`);
             return;
@@ -239,8 +251,19 @@ class Console extends EventEmitter {
                 this.repositionCursor();
                 return;
             case '~': // Final byte of key code
-                if(param_str === '3') { // DEL Right key
-                    this.inBuffer.splice(this.inPos, 1);
+                let paramsTil = param_str.split(';').map(x => x || '1');
+                let ctrlEnTil = paramsTil[1] === '5' || paramsTil[1] === '6';
+                if(paramsTil[0] === '3') { // DEL Right key
+                    let newPos = this.inPos + 1;
+                    if(ctrlEnTil) {
+                        let newWordPos = this.inBuffer.slice(newPos).findIndex(x => (paramsRi[1] === 6 ? /\s/ : /[^\w]/).test(x));
+                        if(newWordPos === -1) {
+                            newPos = this.inBuffer.length;
+                        } else {
+                            newPos = Math.min(newPos + newWordPos + 1, this.inBuffer.length);
+                        }
+                    }
+                    this.inBuffer.splice(this.inPos, newPos - this.inPos);
                     this.redisplay();
                     return;
                 }

@@ -3,7 +3,11 @@
 [![npm version](https://img.shields.io/npm/v/flowprompt.svg)](https://www.npmjs.com/package/flowprompt)
 [![npm downloads](https://img.shields.io/npm/dw/flowprompt)](https://www.npmjs.com/package/flowprompt)
 
-A Node.js terminal interface library for building rich interactive CLI applications. It provides a persistent prompt with managed logging output above. It's like REPL interfaces but has the benefit of output and input being evaulated separately. It is inspired by debugger interfaces like `gdb`.
+A Node.js terminal interface library for building rich interactive CLI applications. It provides a persistent prompt with managed logging output above. It's like REPL interfaces but has the benefit of output and input being evaulated separately which means you can input while output is generated. It is inspired by debugger interfaces like `gdb`.
+
+![Demo](demo.gif)
+
+<sup>[view /examples/demo-example.js](examples/demo-example.js)</sup>
 
 ## Table of Contents
 
@@ -37,8 +41,6 @@ npm install flowprompt
 
 ### TypeScript Example
 
-[view /examples/typescript-example.ts](examples/typescript-example.ts)
-
 ```typescript
 import { Console } from 'flowprompt';
 
@@ -56,6 +58,8 @@ vm.on('line', (line: string) => {
 });
 ```
 
+<sup>[view /examples/typescript-example.ts](examples/typescript-example.ts)</sup>
+
 Or run it using the following command:
 
 ```sh
@@ -63,8 +67,6 @@ npx tsx examples/typescript-example.ts
 ```
 
 ### Asynchronous Output Example
-
-[view /examples/async-example.cjs](examples/async-example.cjs)
 
 ```javascript
 const { Console } = require('flowprompt');
@@ -85,6 +87,8 @@ vm.on("line", (line) => {
 })
 ```
 
+<sup>[view /examples/async-example.cjs](examples/async-example.cjs)</sup>
+
 Or run it using the following command:
 
 ```sh
@@ -92,8 +96,6 @@ node examples/async-example.cjs
 ```
 
 ### Debugger-like Interface Example
-
-[view /examples/debugger-example.mjs](examples/debugger-example.mjs)
 
 ```javascript
 import { Console } from 'flowprompt';
@@ -122,6 +124,8 @@ debuggerConsole.on('line', (cmd) => {
     }
 });
 ```
+
+<sup>[view /examples/debugger-example.mjs](examples/debugger-example.mjs)</sup>
 
 Or run it using the following command:
 

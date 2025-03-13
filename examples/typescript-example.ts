@@ -3,7 +3,9 @@ import { Console } from 'flowprompt';
 const vm = new Console({
     input: process.stdin,
     output: process.stdout,
-}, '-> ', 'utf8');
+    prompt: '-> ',
+    encoding: 'utf8',
+});
 
 vm.log('Welcome to the VM Console!', true);
 

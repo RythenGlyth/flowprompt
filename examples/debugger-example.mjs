@@ -2,8 +2,9 @@ import { Console } from 'flowprompt';
 
 const debuggerConsole = new Console({
     input: process.stdin,
-    output: process.stdout
-}, '(debugger) ');
+    output: process.stdout,
+    prompt: '(debugger) '
+});
 
 debuggerConsole.on('line', (cmd) => {
     switch (cmd) {

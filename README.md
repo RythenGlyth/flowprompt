@@ -45,7 +45,9 @@ import { Console } from 'flowprompt';
 const vm = new Console({
     input: process.stdin,
     output: process.stdout,
-}, '-> ', 'utf8');
+    prompt: '-> ',
+    encoding: 'utf8',
+});
 
 vm.log('Welcome to the VM Console!', true);
 
@@ -65,12 +67,14 @@ npx tsx examples/typescript-example.ts
 [view /examples/async-example.cjs](examples/async-example.cjs)
 
 ```javascript
-const { Console } = require('flowprompt')
+const { Console } = require('flowprompt');
 
 const vm = new Console({
     input: process.stdin,
     output: process.stdout,
-}, 'my-app> ', 'utf8');
+    prompt: 'my-app> ',
+    encoding: 'utf8'
+});
 
 setInterval(() => {
     vm.log(String.fromCodePoint(Math.floor(Math.random() * (0x5a - 0x41) + 0x41)), false);
@@ -96,8 +100,9 @@ import { Console } from 'flowprompt';
 
 const debuggerConsole = new Console({
     input: process.stdin,
-    output: process.stdout
-}, '(debugger) ');
+    output: process.stdout,
+    prompt: '(debugger) '
+});
 
 debuggerConsole.on('line', (cmd) => {
     switch (cmd) {

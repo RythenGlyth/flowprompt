@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import { Writable } from 'stream';
 import { StringDecoder } from 'string_decoder';
+import util from 'util';
 
 const CONTROL_CHAR_REGEX = /\p{General_Category=Control}/ug;
 
@@ -405,6 +406,9 @@ class Console extends EventEmitter {
         this.output.write(`\x1B[${cursorPos}G`); // Move cursor to correct position
     }
 
+    public print(...args: any[]) {
+        this.log(util.format(...args), true);
+    }
     public log(str: string, newline: boolean = true) {
         if(this.logPos.hadNewline) {
             this.output.write("\x1B[1G"); // Move cursor to start of line

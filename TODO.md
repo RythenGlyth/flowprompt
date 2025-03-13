@@ -1,6 +1,4 @@
 - ctrl+backspace to delete word (hard to implement, sent sequences are not consistent across terminals, backspace and ctrl+backspace are swapped in some terminals)
 - allow custom SIGINT handler
-- Tab completion
 - switch to keypress events instead of data events for better control
-- use util.format for logging
 - fix line wrapping
